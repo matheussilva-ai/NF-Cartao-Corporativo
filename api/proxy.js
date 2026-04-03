@@ -33,17 +33,22 @@ export default async function handler(req, res) {
 
     const text = await response.text();
 
+    // Tenta encontrar JSON válido na resposta (Apps Script às vezes retorna HTML com o JSON embutido)
     let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      return res.status(500).json({
-        error: 'Resposta inválida do Apps Script',
-        raw: text.substring(0, 300),
-      });
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        data = JSON.parse(jsonMatch[0]);
+        return res.status(200).json(data);
+      } catch(e) {}
     }
 
-    return res.status(200).json(data);
+    // Se não conseguiu parsear, retorna o texto bruto para debug
+    return res.status(200).json({ 
+      error: 'Resposta inesperada do servidor', 
+      raw: text.substring(0, 500) 
+    });
+
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
