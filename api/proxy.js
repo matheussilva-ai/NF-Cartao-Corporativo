@@ -13,13 +13,8 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const bodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
@@ -33,23 +28,18 @@ export default async function handler(req, res) {
 
     const text = await response.text();
 
-    // Tenta encontrar JSON válido na resposta (Apps Script às vezes retorna HTML com o JSON embutido)
-    let data;
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try {
-        data = JSON.parse(jsonMatch[0]);
-        return res.status(200).json(data);
-      } catch(e) {}
+    // Tenta parsear diretamente
+    try {
+      const data = JSON.parse(text);
+      return res.status(200).json(data);
+    } catch(e) {
+      // Retorna o texto bruto para debug
+      return res.status(200).json({ 
+        error: 'RAW: ' + text.substring(0, 800)
+      });
     }
 
-    // Se não conseguiu parsear, retorna o texto bruto para debug
-    return res.status(200).json({ 
-      error: 'Resposta inesperada do servidor', 
-      raw: text.substring(0, 500) 
-    });
-
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'FETCH_ERR: ' + err.message });
   }
 }
