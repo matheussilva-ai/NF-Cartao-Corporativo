@@ -888,7 +888,7 @@ select:focus, input[type="text"]:focus, textarea:focus {
             <span class="dupe-warn-icon">⚠️</span>
             <div class="dupe-warn-text">
               <strong>Possível nota duplicada</strong>
-              Já existe um lançamento com a mesma data e valor na planilha. Deseja salvar mesmo assim?
+              <span id="dupeWarnMsg">Já existe um lançamento similar na planilha. Deseja salvar mesmo assim?</span>
             </div>
           </div>
           <div class="dupe-warn-actions">
@@ -1165,8 +1165,10 @@ document.getElementById('btnConfirm').addEventListener('click', async () => {
   const valorTotal = document.getElementById('reviewValor').value.replace(',','.').replace('R$','').trim();
   if (!fornecedor || !dataCompra || !valorTotal) { alert('Preencha todos os campos obrigatórios.'); return; }
   try {
-    const check = await callAppsScript('checkDuplicate', { dataCompra, valorTotal });
+    const numeroNf = document.getElementById('reviewNumeroNf').value.trim();
+    const check = await callAppsScript('checkDuplicate', { dataCompra, valorTotal, numeroNf });
     if (check.duplicate) {
+      document.getElementById('dupeWarnMsg').textContent = check.motivo || 'Já existe um lançamento similar na planilha. Deseja salvar mesmo assim?';
       document.getElementById('duplicateWarning').style.display = 'block';
       document.getElementById('btnConfirm').style.display = 'none';
       return;
