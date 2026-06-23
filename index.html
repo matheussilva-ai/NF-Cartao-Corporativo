@@ -166,7 +166,7 @@ main { flex: 1; padding: 32px 20px 64px; max-width: 540px; margin: 0 auto; width
 .upload-zone:hover, .upload-zone.drag-over { border-color: var(--purple); background: rgba(110,105,173,0.04); }
 .upload-zone:hover::before, .upload-zone.drag-over::before { opacity: 1; }
 
-#fileInput { position: absolute; width: 0; height: 0; opacity: 0; overflow: hidden; pointer-events: none; }
+#fileInput { position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
 .upload-icon-wrap {
   width: 52px; height: 52px;
@@ -430,8 +430,8 @@ select:focus, input[type="text"]:focus, textarea:focus { border-color: var(--pur
         <div id="errorBanner" class="error-banner"></div>
 
         <!-- Upload -->
-        <label class="upload-zone" id="uploadZone" style="display:block">
-          <input type="file" id="fileInput" accept="application/pdf" />
+        <input type="file" id="fileInput" accept="application/pdf" />
+        <div class="upload-zone" id="uploadZone">
           <div class="upload-icon-wrap">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -443,7 +443,7 @@ select:focus, input[type="text"]:focus, textarea:focus { border-color: var(--pur
           <span style="display:inline-block; margin-top:14px; padding:10px 24px; background:linear-gradient(135deg,#6E69AD,#3D3A7A); color:white; border:none; border-radius:10px; font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; letter-spacing:-0.01em;">
             Selecionar arquivo
           </span>
-        </label>
+        </div>
 
         <div class="file-chip" id="fileSelectedBox" style="display:none">
           <div class="file-chip-icon">
@@ -803,6 +803,7 @@ const tipoCompraSelect = document.getElementById('tipoCompraSelect');
 const btnExtract = document.getElementById('btnExtract');
 
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
 uploadZone.addEventListener('drop', e => {
